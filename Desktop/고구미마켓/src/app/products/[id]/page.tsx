@@ -115,12 +115,20 @@ export default async function ProductDetailPage({
             <p className="font-bold text-lg text-foreground">
               ₩{product.price.toLocaleString()}
             </p>
-            <a
-              href={`/chat?product=${product.id}`}
-              className={cn(buttonVariants({ variant: "default" }), "rounded-xl px-6")}
-            >
-              채팅하기
-            </a>
+            <div className="flex gap-2">
+              <a
+                href={`/chat?product=${product.id}`}
+                className={cn(buttonVariants({ variant: "outline" }), "rounded-xl px-4")}
+              >
+                채팅하기
+              </a>
+              <a
+                href={`/checkout?productId=${product.id}`}
+                className={cn(buttonVariants({ variant: "default" }), "rounded-xl px-4")}
+              >
+                구매하기
+              </a>
+            </div>
           </div>
         </div>
       </div>
