@@ -21,17 +21,28 @@ type Product = {
   created_at: string;
 };
 
+const STATUSES = ["전체", "판매중", "예약중", "판매완료"];
+
+type SortKey = "latest" | "price_asc" | "price_desc";
+
 export default function ProductList({ products }: { products: Product[] }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("전체");
+  const [status, setStatus] = useState("전체");
+  const [sort, setSort] = useState<SortKey>("latest");
 
   const filtered = useMemo(() => {
-    return products.filter((p) => {
+    const result = products.filter((p) => {
       const matchQuery = p.title.toLowerCase().includes(query.toLowerCase());
       const matchCat = category === "전체" || p.category === category;
-      return matchQuery && matchCat;
+      const matchStatus = status === "전체" || p.status === status;
+      return matchQuery && matchCat && matchStatus;
     });
-  }, [products, query, category]);
+
+    if (sort === "price_asc") return [...result].sort((a, b) => a.price - b.price);
+    if (sort === "price_desc") return [...result].sort((a, b) => b.price - a.price);
+    return result; // latest: 서버 정렬 유지
+  }, [products, query, category, status, sort]);
 
   return (
     <>
@@ -54,9 +65,10 @@ export default function ProductList({ products }: { products: Product[] }) {
         </div>
       </div>
 
-      {/* 카테고리 탭 */}
+      {/* 카테고리 탭 + 상태 필터 */}
       <div className="sticky top-[6.25rem] z-10 bg-background border-b">
-        <div className="flex overflow-x-auto scrollbar-hide px-3 py-2 gap-2">
+        {/* 카테고리 */}
+        <div className="flex overflow-x-auto scrollbar-hide px-3 pt-2 pb-1.5 gap-2">
           {CATEGORIES.map((cat) => (
             <button
               key={cat}
@@ -71,6 +83,31 @@ export default function ProductList({ products }: { products: Product[] }) {
             </button>
           ))}
         </div>
+        {/* 상태 필터 + 정렬 */}
+        <div className="flex items-center px-3 pb-2 gap-2">
+          {STATUSES.map((s) => (
+            <button
+              key={s}
+              onClick={() => setStatus(s)}
+              className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                status === s
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border text-muted-foreground hover:border-primary/50"
+              }`}
+            >
+              {s}
+            </button>
+          ))}
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as SortKey)}
+            className="ml-auto text-xs text-muted-foreground bg-transparent focus:outline-none cursor-pointer"
+          >
+            <option value="latest">최신순</option>
+            <option value="price_asc">낮은 가격순</option>
+            <option value="price_desc">높은 가격순</option>
+          </select>
+        </div>
       </div>
 
       {/* 상품 목록 */}
@@ -79,9 +116,9 @@ export default function ProductList({ products }: { products: Product[] }) {
           <div className="text-center py-24">
             <p className="text-5xl mb-4">🍠</p>
             <p className="text-base font-medium text-foreground">
-              {query || category !== "전체" ? "검색 결과가 없습니다." : "등록된 상품이 없습니다."}
+              {query || category !== "전체" || status !== "전체" ? "검색 결과가 없습니다." : "등록된 상품이 없습니다."}
             </p>
-            {!query && category === "전체" && (
+            {!query && category === "전체" && status === "전체" && (
               <p className="text-sm text-muted-foreground mt-1">첫 번째 상품을 등록해보세요!</p>
             )}
           </div>
