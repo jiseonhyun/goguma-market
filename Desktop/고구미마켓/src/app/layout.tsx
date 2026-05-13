@@ -13,7 +13,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
-      <body className="bg-gray-50 min-h-screen">{children}</body>
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/subsets/Paperlogy-dynamic-subset.css"
+        />
+      </head>
+      <body className="bg-background min-h-screen">{children}</body>
     </html>
   );
 }
